@@ -115,6 +115,7 @@
             this.buttonCredit.TabIndex = 6;
             this.buttonCredit.Text = "2. Deposit (Credit)";
             this.buttonCredit.UseVisualStyleBackColor = true;
+            this.buttonCredit.Click += new System.EventHandler(this.buttonCredit_Click);
             // 
             // buttonDebit
             // 
@@ -124,6 +125,7 @@
             this.buttonDebit.TabIndex = 7;
             this.buttonDebit.Text = "3. Withdraw (Debit)";
             this.buttonDebit.UseVisualStyleBackColor = true;
+            this.buttonDebit.Click += new System.EventHandler(this.buttonDebit_Click);
             // 
             // textBoxFirstName
             // 

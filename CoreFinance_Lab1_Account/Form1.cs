@@ -78,5 +78,65 @@ namespace CoreFinance_Lab1_Account
         {
             maskedTextBoxBirthDay.SelectionStart = 0;
         }
+
+        private void buttonCredit_Click(object sender, EventArgs e)
+        {
+            double amount;
+
+            if(double.TryParse(textBoxAmount.Text, out amount))
+            {
+                try
+                {
+                    if (acc == null)
+                    {
+                        MessageBox.Show("Сначала необходимо открыть счет!", "Ошибка операции");
+                        return;
+                    }
+
+                    acc.Credit(amount);
+
+                    listBoxLogs.Items.Add($"[ПОПОЛНЕНИЕ] +{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                    textBoxAmount.Clear();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка валидации");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Введите корректную сумму пополнения цифрами!", "Ошибка ввода");
+            }
+        }
+
+        private void buttonDebit_Click(object sender, EventArgs e)
+        {
+            double amount;
+
+            if (double.TryParse(textBoxAmount.Text, out amount))
+            {
+                try
+                {
+                    if (acc == null)
+                    {
+                        MessageBox.Show("Сначала необходимо открыть счет!", "Ошибка операции");
+                        return;
+                    }
+
+                    acc.Debit(amount);
+
+                    listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                    textBoxAmount.Clear();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка валидации");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Введите корректную сумму снятия цифрами!", "Ошибка ввода");
+            }
+        }
     }
 }
