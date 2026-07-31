@@ -26,7 +26,12 @@ namespace CoreFinance_Lab1_Account
             double initialBalance;
             DateTime userBirthDate;
 
-            if (!double.TryParse(textBoxAmount.Text, out initialBalance))
+            if (string.IsNullOrEmpty(textBoxAmount.Text))
+            {
+                initialBalance = 0;
+            }
+
+            else if (!double.TryParse(textBoxAmount.Text, out initialBalance))
             {
                 MessageBox.Show("Введите корректную стартовую сумму цифрами!", "Ошибка ввода");
                 return;
@@ -47,21 +52,39 @@ namespace CoreFinance_Lab1_Account
 
             try
             {
-                acc = new BankAccount(
-                textBoxLastName.Text,
-                textBoxFirstName.Text,
-                textBoxMiddleName.Text,
-                userBirthDate,
-                initialBalance
-                );
+                if (comboBoxAccountType.Text == "CreditAccount")
+
+                {
+                    acc = new CreditAccount(
+                    textBoxLastName.Text,
+                    textBoxFirstName.Text,
+                    textBoxMiddleName.Text,
+                    userBirthDate,
+                    initialBalance,
+                    30000
+                    );
+
+                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Доступный лимит: 30 000 руб.");
+                }
+
+                else
+                {
+                    acc = new BankAccount(
+                    textBoxLastName.Text,
+                    textBoxFirstName.Text,
+                    textBoxMiddleName.Text,
+                    userBirthDate,
+                    initialBalance
+                    );
+
+                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт ДЕБЕТОВЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб.");
+
+                }
 
                 lastInterestDate = DateTime.Now;
 
-                listBoxLogs.Items.Add($"[УСПЕХ] Открыт счет. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб.");
                 textBoxAmount.Clear();
                 maskedTextBoxBirthDay.Clear();
-
-
             }
             catch (Exception ex)
             {
@@ -71,7 +94,7 @@ namespace CoreFinance_Lab1_Account
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            comboBoxAccountType.SelectedIndex = 0;
         }
 
         private void maskedTextBoxBirthDay_MouseClick(object sender, MouseEventArgs e)
@@ -125,7 +148,15 @@ namespace CoreFinance_Lab1_Account
 
                     acc.Debit(amount);
 
-                    listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                    if (acc.Balance < 0)
+                    {
+                        listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Внимание! Минус по счету (овердрафт)! Текущий баланс: {acc.Balance} руб.");
+                    }
+                    else
+                    {
+                        listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                    }
+
                     textBoxAmount.Clear();
                 }
                 catch (Exception ex)
@@ -137,6 +168,36 @@ namespace CoreFinance_Lab1_Account
             {
                 MessageBox.Show("Введите корректную сумму снятия цифрами!", "Ошибка ввода");
             }
+        }
+
+        private void listBoxLogs_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            string itemText = listBoxLogs.Items[e.Index].ToString();
+
+            Brush textBrush = Brushes.Blue;
+
+            if (itemText.Contains("[ПОПОЛНЕНИЕ]") || itemText.Contains("[CREDIT]"))
+            {
+                textBrush = Brushes.ForestGreen;
+            }    
+
+                if (itemText.Contains("овердрафт") || itemText.Contains("Минус"))
+            {
+                textBrush = Brushes.Orange;
+            }
+
+            else if (itemText.Contains("[ОШИБКА]"))
+            {
+                textBrush = Brushes.Red;
+            }
+
+            e.DrawBackground();
+
+            e.Graphics.DrawString(itemText, e.Font, textBrush, e.Bounds);
+
+            e.DrawFocusRectangle();
         }
     }
 }

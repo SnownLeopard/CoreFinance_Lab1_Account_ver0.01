@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace CoreFinance_Lab1_Account
 {
-    internal class BankAccount
+    public class BankAccount
     {
         private string lastName;
         private string firstName;
         private string middleName;
-        private double balance;
+        protected double balance;
         private static double interestRate = 0.01;
         private DateTime birthDate;
         private DateTime lastInterestDate;
@@ -78,7 +78,7 @@ namespace CoreFinance_Lab1_Account
             }
         }
 
-        public void Debit(double amount)
+        public virtual void Debit(double amount)
         {
             if (amount <= 0)
             {

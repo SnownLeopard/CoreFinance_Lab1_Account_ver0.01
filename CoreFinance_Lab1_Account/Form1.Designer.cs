@@ -42,6 +42,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.maskedTextBoxBirthDay = new System.Windows.Forms.MaskedTextBox();
+            this.comboBoxAccountType = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // label1
@@ -98,6 +99,7 @@
             // 
             // listBoxLogs
             // 
+            this.listBoxLogs.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.listBoxLogs.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listBoxLogs.FormattingEnabled = true;
             this.listBoxLogs.ItemHeight = 20;
@@ -106,6 +108,7 @@
             this.listBoxLogs.Name = "listBoxLogs";
             this.listBoxLogs.Size = new System.Drawing.Size(836, 304);
             this.listBoxLogs.TabIndex = 5;
+            this.listBoxLogs.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.listBoxLogs_DrawItem);
             // 
             // buttonCredit
             // 
@@ -187,11 +190,24 @@
             this.maskedTextBoxBirthDay.TabIndex = 13;
             this.maskedTextBoxBirthDay.MouseClick += new System.Windows.Forms.MouseEventHandler(this.maskedTextBoxBirthDay_MouseClick);
             // 
+            // comboBoxAccountType
+            // 
+            this.comboBoxAccountType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxAccountType.FormattingEnabled = true;
+            this.comboBoxAccountType.Items.AddRange(new object[] {
+            "DebitAccount",
+            "CreditAccount"});
+            this.comboBoxAccountType.Location = new System.Drawing.Point(576, 27);
+            this.comboBoxAccountType.Name = "comboBoxAccountType";
+            this.comboBoxAccountType.Size = new System.Drawing.Size(121, 28);
+            this.comboBoxAccountType.TabIndex = 14;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 661);
+            this.Controls.Add(this.comboBoxAccountType);
             this.Controls.Add(this.maskedTextBoxBirthDay);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -232,6 +248,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.MaskedTextBox maskedTextBoxBirthDay;
+        private System.Windows.Forms.ComboBox comboBoxAccountType;
     }
 }
 
