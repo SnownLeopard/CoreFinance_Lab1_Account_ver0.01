@@ -21,7 +21,7 @@ namespace CoreFinance_Lab1_Account
             InitializeComponent();
         }
 
-        private void buttonCreate_Click(object sender, EventArgs e)
+        private void btnOpenAccount(object sender, EventArgs e)
         {
             double initialBalance;
             DateTime userBirthDate;
@@ -63,8 +63,10 @@ namespace CoreFinance_Lab1_Account
                     initialBalance,
                     30000
                     );
+                    double totalAvailable = 30000 + initialBalance;
 
-                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Доступный лимит: 30 000 руб.");
+                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Доступный лимит: {totalAvailable} руб.");
+
                 }
 
                 else
@@ -178,7 +180,7 @@ namespace CoreFinance_Lab1_Account
 
             Brush textBrush = Brushes.Blue;
 
-            if (itemText.Contains("[ПОПОЛНЕНИЕ]") || itemText.Contains("[CREDIT]"))
+            if (itemText.Contains("[ПОПОЛНЕНИЕ]") || itemText.Contains("[УСПЕХ]"))
             {
                 textBrush = Brushes.ForestGreen;
             }    
@@ -186,11 +188,6 @@ namespace CoreFinance_Lab1_Account
                 if (itemText.Contains("овердрафт") || itemText.Contains("Минус"))
             {
                 textBrush = Brushes.Orange;
-            }
-
-            else if (itemText.Contains("[ОШИБКА]"))
-            {
-                textBrush = Brushes.Red;
             }
 
             e.DrawBackground();

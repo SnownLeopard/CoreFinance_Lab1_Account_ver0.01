@@ -95,7 +95,7 @@
             this.buttonCreate.TabIndex = 4;
             this.buttonCreate.Text = "1. Open Account";
             this.buttonCreate.UseVisualStyleBackColor = true;
-            this.buttonCreate.Click += new System.EventHandler(this.buttonCreate_Click);
+            this.buttonCreate.Click += new System.EventHandler(this.btnOpenAccount);
             // 
             // listBoxLogs
             // 

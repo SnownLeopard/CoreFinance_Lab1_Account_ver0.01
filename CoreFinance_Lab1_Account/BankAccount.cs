@@ -27,13 +27,13 @@ namespace CoreFinance_Lab1_Account
             get { return birthDate; }
             set
             {
-                if(value > DateTime.Now)
+                if(value > DateTime.Now.Date)
                 {
                     throw new ArgumentException("Дата рождения не может быть в будущем!");
                 }
-                int age = DateTime.Now.Year;
+                int age = DateTime.Now.Year - value.Year;
 
-                if(value.Date > DateTime.Now.AddYears(-age))
+                if (value.Date > DateTime.Now.AddYears(-age))
                 {
                     age--;
                 }
@@ -52,7 +52,7 @@ namespace CoreFinance_Lab1_Account
             this.lastName = lastName;
             this.firstName = firstName;
             this.middleName = middleName;
-            this.birthDate = birthDate;
+            this.BirthDate = birthDate;
 
             if (initialBalance >= 0)
                 this.balance = initialBalance;
