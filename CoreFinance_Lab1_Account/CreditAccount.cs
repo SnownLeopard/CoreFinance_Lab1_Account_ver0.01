@@ -25,10 +25,6 @@ public class CreditAccount : BankAccount
             }    
 
                 Balance -= amount;
-
-           /* 
-            
-           */
         }
 
 
@@ -37,10 +33,6 @@ public class CreditAccount : BankAccount
             if (amount <= 0)
                 throw new Exception("Сумма снятия должна быть больше нуля!");
 
-            /*
-            if (creditLimit < amount - Balance)
-                throw new Exception($"Критическая ошибка: Превышен лимит овердрафта! Доступный лимит: {creditLimit} руб.");
-            */
             Balance += amount;
         }
 
