@@ -15,11 +15,34 @@ public class CreditAccount : BankAccount
         public override void Debit(double amount)
         {
             if (amount <= 0)
-                throw new Exception("Сумма снятия должна быть больше нуля!");
+            {
+                throw new ArgumentException("Критическая ошибка: Сумма снятия должна быть больше нуля!");
+            }
 
             if (creditLimit < amount - Balance)
+            {
                 throw new Exception($"Критическая ошибка: Превышен лимит овердрафта! Доступный лимит: {creditLimit} руб.");
-            balance -= amount;
+            }    
+
+                Balance -= amount;
+
+           /* 
+            
+           */
         }
+
+
+            public override void Credit(double amount)
+        {
+            if (amount <= 0)
+                throw new Exception("Сумма снятия должна быть больше нуля!");
+
+            /*
+            if (creditLimit < amount - Balance)
+                throw new Exception($"Критическая ошибка: Превышен лимит овердрафта! Доступный лимит: {creditLimit} руб.");
+            */
+            Balance += amount;
+        }
+
     }
 }

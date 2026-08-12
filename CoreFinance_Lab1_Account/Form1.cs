@@ -71,7 +71,7 @@ namespace CoreFinance_Lab1_Account
 
                 else
                 {
-                    acc = new BankAccount(
+                    acc = new DebitAccount(
                     textBoxLastName.Text,
                     textBoxFirstName.Text,
                     textBoxMiddleName.Text,

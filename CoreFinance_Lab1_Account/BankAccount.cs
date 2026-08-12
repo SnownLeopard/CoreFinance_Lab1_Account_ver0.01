@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CoreFinance_Lab1_Account
 {
-    public class BankAccount
+    public abstract class BankAccount
     {
         private string lastName;
         private string firstName;
@@ -66,34 +66,8 @@ namespace CoreFinance_Lab1_Account
             balance += interest;
         }
 
-        public void Credit(double amount)
-        {
-            if (amount > 0)
-            {
-                balance += amount;
-            }
-            else
-            {
-                throw new ArgumentException("Критическая ошибка: Сумма пополнения должна быть больше нуля!");
-            }
-        }
+        public abstract void Credit(double amount);
 
-        public virtual void Debit(double amount)
-        {
-            if (amount <= 0)
-            {
-                throw new ArgumentException("Критическая ошибка: Сумма снятия должна быть больше нуля!");
-            }
-
-            if (amount <= balance)
-            {
-                balance -= amount;
-            }
-
-            else
-            {
-                throw new InvalidOperationException("Критическая ошибка: Недостаточно средств на счёте для совершения операции!");
-            }
-        }
+        public abstract void Debit(double amount);
     }
 }
