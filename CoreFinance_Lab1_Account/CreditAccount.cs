@@ -27,11 +27,10 @@ public class CreditAccount : BankAccount
                 Balance -= amount;
         }
 
-
             public override void Credit(double amount)
         {
             if (amount <= 0)
-                throw new Exception("Сумма снятия должна быть больше нуля!");
+                throw new Exception("Критическая ошибка: Сумма пополнения должна быть больше нуля!");
 
             Balance += amount;
         }
