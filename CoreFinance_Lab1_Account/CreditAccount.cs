@@ -6,10 +6,10 @@ public class CreditAccount : BankAccount
     {
         private double creditLimit;
 
-        public CreditAccount(string lastName, string firstName, string middleName, DateTime berthDate, double balance, double limit)
+        public CreditAccount(string lastName, string firstName, string middleName, DateTime berthDate, double balance)
             : base(lastName, firstName, middleName, berthDate, balance)
         {
-            this.creditLimit = limit;
+            this.creditLimit = 30000;
         }
 
         public override void Debit(double amount)
@@ -29,10 +29,12 @@ public class CreditAccount : BankAccount
 
             public override void Credit(double amount)
         {
-            if (amount <= 0)
+            if (amount > 0)
+            {
+                Balance += amount;
+            }
+            else    
                 throw new Exception("Критическая ошибка: Сумма пополнения должна быть больше нуля!");
-
-            Balance += amount;
         }
 
     }

@@ -15,7 +15,11 @@ namespace CoreFinance_Lab1_Account
     {
         private BankAccount acc;
         private DateTime lastInterestDate;
+        private IAccountFactory accountFactory = AccountFactory.Instance;
+        private ILogger logger;
 
+
+        private System.Windows.Forms.Timer interestTimer;
         public Form1()
         {
             InitializeComponent();
@@ -52,26 +56,8 @@ namespace CoreFinance_Lab1_Account
 
             try
             {
-                if (comboBoxAccountType.Text == "CreditAccount")
-
-                {
-                    acc = new CreditAccount(
-                    textBoxLastName.Text,
-                    textBoxFirstName.Text,
-                    textBoxMiddleName.Text,
-                    userBirthDate,
-                    initialBalance,
-                    30000
-                    );
-                    double totalAvailable = 30000 + initialBalance;
-
-                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Доступный лимит: {totalAvailable} руб.");
-
-                }
-
-                else
-                {
-                    acc = new DebitAccount(
+                acc = accountFactory.CreateAccount(
+                    comboBoxAccountType.Text,
                     textBoxLastName.Text,
                     textBoxFirstName.Text,
                     textBoxMiddleName.Text,
@@ -79,12 +65,23 @@ namespace CoreFinance_Lab1_Account
                     initialBalance
                     );
 
-                    listBoxLogs.Items.Add($"[УСПЕХ] Открыт ДЕБЕТОВЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб.");
+                if (comboBoxAccountType.Text == "VipCreditAccount")
+                {
+                    logger.Log($"[УСПЕХ] Открыт VIP КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб. Одобренная броня лимита: 500000 руб.");
+                }
 
+                else if (comboBoxAccountType.Text == "CreditAccount")
+
+                {
+                    logger.Log($"[УСПЕХ] Открыт КРЕДИТНЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб. Доступный лимит: 30000 руб.");
+                }
+
+                else
+                {
+                    logger.Log($"[УСПЕХ] Открыт ДЕБЕТОВЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб.");
                 }
 
                 lastInterestDate = DateTime.Now;
-
                 textBoxAmount.Clear();
                 maskedTextBoxBirthDay.Clear();
             }
@@ -97,6 +94,13 @@ namespace CoreFinance_Lab1_Account
         private void Form1_Load(object sender, EventArgs e)
         {
             comboBoxAccountType.SelectedIndex = 0;
+            logger = new ListBoxLogger(listBoxLogs);
+            AccountFactory.Instance.Initialize(logger);
+
+            interestTimer = new System.Windows.Forms.Timer();
+            interestTimer.Interval = 10000; 
+            interestTimer.Tick += InterestTimer_Tick;
+            interestTimer.Start();
         }
 
         private void maskedTextBoxBirthDay_MouseClick(object sender, MouseEventArgs e)
@@ -112,15 +116,11 @@ namespace CoreFinance_Lab1_Account
             {
                 try
                 {
-                    if (acc == null)
-                    {
-                        MessageBox.Show("Сначала необходимо открыть счет!", "Ошибка операции");
-                        return;
-                    }
+                    if (!EnsureAccountExists()) return;
 
                     acc.Credit(amount);
 
-                    listBoxLogs.Items.Add($"[ПОПОЛНЕНИЕ] +{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                    logger.Log($"[ПОПОЛНЕНИЕ] +{amount} руб. Текущий баланс: {acc.Balance} руб.");
                     textBoxAmount.Clear();
                 }
                 catch (Exception ex)
@@ -142,21 +142,17 @@ namespace CoreFinance_Lab1_Account
             {
                 try
                 {
-                    if (acc == null)
-                    {
-                        MessageBox.Show("Сначала необходимо открыть счет!", "Ошибка операции");
-                        return;
-                    }
+                    if (!EnsureAccountExists()) return;
 
                     acc.Debit(amount);
 
                     if (acc.Balance < 0)
                     {
-                        listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Внимание! Минус по счету (овердрафт)! Текущий баланс: {acc.Balance} руб.");
+                        logger.Log($"[СНЯТИЕ] -{amount} руб. Внимание! Минус по счету (овердрафт)! Текущий баланс: {acc.Balance} руб.");
                     }
                     else
                     {
-                        listBoxLogs.Items.Add($"[СНЯТИЕ] -{amount} руб. Текущий баланс: {acc.Balance} руб.");
+                        logger.Log($"[СНЯТИЕ] -{amount} руб. Текущий баланс: {acc.Balance} руб.");
                     }
 
                     textBoxAmount.Clear();
@@ -195,6 +191,44 @@ namespace CoreFinance_Lab1_Account
             e.Graphics.DrawString(itemText, e.Font, textBrush, e.Bounds);
 
             e.DrawFocusRectangle();
+        }
+        private void InterestTimer_Tick(object sender, EventArgs e)
+        {
+            // Если счёт ещё не открыт оператором — таймер просто молча ждёт в памяти
+            if (acc == null) return;
+
+            try
+            {
+                double oldBalance = acc.Balance;
+
+                acc.AccumulateInterest();
+
+                double profit = acc.Balance - oldBalance;
+
+                {
+                    logger.Log($"[ДОХОД] Автоматическое начисление процентов на остаток: +{Math.Round(profit, 2)} руб. Текущий баланс: {Math.Round(acc.Balance, 2)} руб.");
+                }
+            }
+            catch (Exception ex)
+            {
+                interestTimer.Stop();
+                MessageBox.Show($"Сбой авто-начисления: {ex.Message}", "Ошибка системы");
+            }
+        }
+
+        private bool EnsureAccountExists()
+        {
+            if (acc == null)
+            {
+                MessageBox.Show("Сначала необходимо открыть счет!", "Ошибка операции");
+                return false;
+            }
+            return true;
+        }
+
+        private void comboBoxAccountType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

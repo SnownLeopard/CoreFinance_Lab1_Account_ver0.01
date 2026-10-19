@@ -196,11 +196,13 @@
             this.comboBoxAccountType.FormattingEnabled = true;
             this.comboBoxAccountType.Items.AddRange(new object[] {
             "DebitAccount",
-            "CreditAccount"});
+            "CreditAccount",
+            "VipCreditAccount"});
             this.comboBoxAccountType.Location = new System.Drawing.Point(576, 27);
             this.comboBoxAccountType.Name = "comboBoxAccountType";
             this.comboBoxAccountType.Size = new System.Drawing.Size(121, 28);
             this.comboBoxAccountType.TabIndex = 14;
+            this.comboBoxAccountType.SelectedIndexChanged += new System.EventHandler(this.comboBoxAccountType_SelectedIndexChanged);
             // 
             // Form1
             // 
