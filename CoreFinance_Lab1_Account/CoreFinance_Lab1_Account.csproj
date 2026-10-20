@@ -120,6 +120,7 @@
     <Compile Include="AccountTests.cs" />
     <Compile Include="BankAccount.cs" />
     <Compile Include="CreditAccount.cs" />
+    <Compile Include="DatabaseManager.cs" />
     <Compile Include="DebitAccount.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

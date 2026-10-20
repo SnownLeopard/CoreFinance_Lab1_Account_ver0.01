@@ -56,12 +56,6 @@ namespace CoreFinance_Lab1_Account
                 throw new ArgumentException($"Критическая ошибка: Неизвестный тип счета '{accountType}'");
             }
 
-            if (_logger != null)
-            {
-                _logger.Log($"[СИСТЕМА] Фабрика успешно сгенерировала объект типа {accountType} для клиента {lastName}. Memory Allocated.");
-            }
-
-
             DateTime today = DateTime.Today;
             int clientAge = today.Year - tempAccount.BirthDate.Year;
 
@@ -74,7 +68,7 @@ namespace CoreFinance_Lab1_Account
 
             if (_logger != null)
             {
-                _logger.Log($"[СИСТЕМА] Фабрика успешно сгенерировала объект типа {accountType} для клиента {lastName}. Возраст: {clientAge} года (лет).");
+                _logger.Log($"[СИСТЕМА] Фабрика успешно сгенерировала объект типа {accountType} для клиента {lastName}. Возраст: {clientAge} г.");
             }
 
             return tempAccount;
