@@ -11,46 +11,11 @@ namespace CoreFinance_Lab1_Account
     {
         private string connectionString = @"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\BankDatabase.mdf;Integrated Security=True;";
 
-        public void CreateTablesIfNotExist()
+        public List<BankAccount> LoadAccounts()
         {
-            string script = @"
-                IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Accounts' AND xtype='U')
-                BEGIN
-                    CREATE TABLE Accounts (
-                        Id INT IDENTITY(1,1) PRIMARY KEY,
-                        AccountType NVARCHAR(50) NOT NULL,
-                        LastName NVARCHAR(100) NOT NULL,
-                        FirstName NVARCHAR(100) NOT NULL,
-                        BirthDate DATE NOT NULL,
-                        Balance DOUBLE PRECISION NOT NULL
-                    )
-                END;";
+            List<BankAccount> accountList = new List<BankAccount>();
 
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                try
-                {
-                    connection.Open();
-
-                    using (SqlCommand command = new SqlCommand(script, connection))
-                    {
-                        command.ExecuteNonQuery();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Windows.Forms.MessageBox.Show($"Ошибка инициализации SQL-таблиц: {ex.Message}", "БД Аврал");
-                }
-            }
-        }
-
-        public void SaveAccount(string accountType, BankAccount account)
-        {
-            if (account == null) return;
-
-            string query = @"
-                INSERT INTO Accounts (AccountType, LastName, FirstName, BirthDate, Balance) 
-                VALUES (@AccountType, @LastName, @FirstName, @BirthDate, @Balance);";
+            string query = "SELECT AccountType, LastName, FirstName, BirthDate, Balance FROM Accounts;";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -60,21 +25,32 @@ namespace CoreFinance_Lab1_Account
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@AccountType", accountType);
+                        using (SqlDataReader reader = command.ExecuteReader()) 
+                        {
+                            while (reader.Read())
+                            {
+                                string type = reader["AccountType"].ToString();
+                                string lastName = reader["LastName"].ToString();
+                                string firstName = reader["FirstName"].ToString();
+                                DateTime birthDate = Convert.ToDateTime(reader["BirthDate"]);
+                                double balance = Convert.ToDouble(reader["Balance"]);
 
-                        command.Parameters.AddWithValue("@LastName", account.LastNameProperty);
-                        command.Parameters.AddWithValue("@FirstName", account.FirstNameProperty);
-                        command.Parameters.AddWithValue("@BirthDate", account.BirthDate);
-                        command.Parameters.AddWithValue("@Balance", account.Balance);
+                                BankAccount loadedAcc = AccountFactory.Instance.CreateAccount(
+                                    type, lastName, firstName, "", birthDate, balance
+                                );
 
-                        command.ExecuteNonQuery(); 
+                                accountList.Add(loadedAcc); 
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.Forms.MessageBox.Show($"Ошибка записи в SQL-базу: {ex.Message}", "БД Аврал");
+                    System.Windows.Forms.MessageBox.Show($"Ошибка чтения из SQL-базы: {ex.Message}", "БД Чтение Аврал");
                 }
             }
+
+            return accountList;
         }
     }
 }
