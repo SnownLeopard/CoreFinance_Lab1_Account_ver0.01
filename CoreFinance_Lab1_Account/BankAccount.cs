@@ -15,6 +15,8 @@ namespace CoreFinance_Lab1_Account
         private static double interestRate = 0.01;
         private DateTime birthDate;
         private DateTime lastInterestDate;
+        public string LastNameProperty => lastName;
+        public string FirstNameProperty => firstName;
 
         public double Balance
         {

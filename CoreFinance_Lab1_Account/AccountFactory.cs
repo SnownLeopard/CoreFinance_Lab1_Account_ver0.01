@@ -8,6 +8,7 @@ namespace CoreFinance_Lab1_Account
 {
     public class AccountFactory : IAccountFactory
     {
+        private DatabaseManager dbManager = new DatabaseManager();
         private static AccountFactory instance;
         private ILogger _logger;
 

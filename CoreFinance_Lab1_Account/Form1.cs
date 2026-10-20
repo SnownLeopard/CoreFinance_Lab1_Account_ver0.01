@@ -101,6 +101,9 @@ namespace CoreFinance_Lab1_Account
             interestTimer.Interval = 10000; 
             interestTimer.Tick += InterestTimer_Tick;
             interestTimer.Start();
+
+            DatabaseManager db = new DatabaseManager();
+            db.CreateTablesIfNotExist();
         }
 
         private void maskedTextBoxBirthDay_MouseClick(object sender, MouseEventArgs e)
