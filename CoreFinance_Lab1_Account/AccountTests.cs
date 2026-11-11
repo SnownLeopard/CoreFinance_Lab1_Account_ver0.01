@@ -73,6 +73,28 @@ namespace CoreFinance_Lab1_Account
             bool containsKeyword = fakeLogger.LastMessage.Contains("[СИСТЕМА] Фабрика успешно сгенерировала объект");
             Assert.IsTrue(containsKeyword, $"Критическая ошибка: Текст лога не соответствует ГОСТу! Было записано: {fakeLogger.LastMessage}");
         }
+
+        [TestMethod]
+        public void Test_DatabaseManager_SaveAndLoad_TextFile_Success()
+        {
+            DatabaseManager db = new DatabaseManager();
+            db.CreateTablesIfNotExist();
+
+            string testLastName = "Тестов_" + Guid.NewGuid().ToString().Substring(0, 5);
+            BankAccount originalAccount = AccountFactory.Instance.CreateAccount(
+                "DebitAccount", testLastName, "Владимир", "", new DateTime(1984, 11, 11), 5000
+            );
+
+            db.SaveAccount("DebitAccount", originalAccount);
+            List<BankAccount> loadedAccounts = db.LoadAccounts();
+
+            BankAccount foundAccount = loadedAccounts.Find(acc => acc.LastNameProperty == testLastName);
+
+            Assert.IsNotNull(foundAccount, "Критическая ошибка: Сохраненный счет не найден в текстовом файле!");
+            Assert.AreEqual(originalAccount.Balance, foundAccount.Balance, "Ошибка: Баланс считанного счета не совпадает с оригиналом!");
+            Assert.AreEqual(originalAccount.FirstNameProperty, foundAccount.FirstNameProperty, "Ошибка: Имя клиента искажено при чтении с диска!");
+        }
+
     }
 
     public class FakeLogger : ILogger
