@@ -78,7 +78,7 @@ namespace CoreFinance_Lab1_Account
         public void Test_DatabaseManager_SaveAndLoad_TextFile_Success()
         {
             DatabaseManager db = new DatabaseManager();
-            db.CreateTablesIfNotExist();
+            db.Initialize();
 
             string testLastName = "Тестов_" + Guid.NewGuid().ToString().Substring(0, 5);
             BankAccount originalAccount = AccountFactory.Instance.CreateAccount(
@@ -93,6 +93,29 @@ namespace CoreFinance_Lab1_Account
             Assert.IsNotNull(foundAccount, "Критическая ошибка: Сохраненный счет не найден в текстовом файле!");
             Assert.AreEqual(originalAccount.Balance, foundAccount.Balance, "Ошибка: Баланс считанного счета не совпадает с оригиналом!");
             Assert.AreEqual(originalAccount.FirstNameProperty, foundAccount.FirstNameProperty, "Ошибка: Имя клиента искажено при чтении с диска!");
+        }
+
+        [TestMethod]
+        public void Test_MS_SQL_Server_SaveAndLoad()
+        {
+            // 1. Arrange (Подготовка хранилища MS SQL Server и тестового клиента)
+            IAccountRepository sqlRepo = new SqlServerRepository();
+            sqlRepo.Initialize();
+
+            string uniqueLastName = "ТестовSQL_" + Guid.NewGuid().ToString().Substring(0, 5);
+            BankAccount testAccount = AccountFactory.Instance.CreateAccount(
+                "DebitAccount", uniqueLastName, "Иван", "Иванович", new DateTime(1995, 5, 15), 25000
+            );
+
+            // 2. Act (Сохраняем в базу MS SQL Server и выгружаем список обратно)
+            sqlRepo.SaveAccount("DebitAccount", testAccount);
+            List<BankAccount> loadedAccounts = sqlRepo.LoadAccounts();
+
+            // 3. Assert (Проверяем, что наш клиент с уникальной фамилией и балансом 25000 найден в БД)
+            BankAccount found = loadedAccounts.Find(a => a.LastNameProperty == uniqueLastName);
+
+            Assert.IsNotNull(found, "Счёт не был найден в базе данных MS SQL Server после сохранения!");
+            Assert.AreEqual(25000, found.Balance, "Баланс счёта в базе данных не совпадает с исходным!");
         }
 
     }

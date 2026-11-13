@@ -115,12 +115,12 @@ namespace CoreFinance_Lab1_Account
         }
     }*/
 
-    public class DatabaseManager
+    public class DatabaseManager : IAccountRepository
     {
         // Стерильный текстовый файл прямо в папке запуска программы bin\Debug
         private string textFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "BankAccountsData.txt");
 
-        public void CreateTablesIfNotExist()
+        public void Initialize()
         {
             try
             {

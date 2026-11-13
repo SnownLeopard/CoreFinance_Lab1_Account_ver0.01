@@ -43,6 +43,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.maskedTextBoxBirthDay = new System.Windows.Forms.MaskedTextBox();
             this.comboBoxAccountType = new System.Windows.Forms.ComboBox();
+            this.rbTextFile = new System.Windows.Forms.RadioButton();
+            this.rbMsSql = new System.Windows.Forms.RadioButton();
             this.SuspendLayout();
             // 
             // label1
@@ -204,11 +206,36 @@
             this.comboBoxAccountType.TabIndex = 14;
             this.comboBoxAccountType.SelectedIndexChanged += new System.EventHandler(this.comboBoxAccountType_SelectedIndexChanged);
             // 
+            // rbTextFile
+            // 
+            this.rbTextFile.AutoSize = true;
+            this.rbTextFile.Checked = true;
+            this.rbTextFile.Location = new System.Drawing.Point(576, 65);
+            this.rbTextFile.Name = "rbTextFile";
+            this.rbTextFile.Size = new System.Drawing.Size(73, 24);
+            this.rbTextFile.TabIndex = 15;
+            this.rbTextFile.TabStop = true;
+            this.rbTextFile.Text = "File.txt";
+            this.rbTextFile.UseVisualStyleBackColor = true;
+            // 
+            // rbMsSql
+            // 
+            this.rbMsSql.AutoSize = true;
+            this.rbMsSql.Location = new System.Drawing.Point(576, 96);
+            this.rbMsSql.Name = "rbMsSql";
+            this.rbMsSql.Size = new System.Drawing.Size(137, 24);
+            this.rbMsSql.TabIndex = 16;
+            this.rbMsSql.TabStop = true;
+            this.rbMsSql.Text = "MS SQL Server";
+            this.rbMsSql.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(884, 661);
+            this.Controls.Add(this.rbMsSql);
+            this.Controls.Add(this.rbTextFile);
             this.Controls.Add(this.comboBoxAccountType);
             this.Controls.Add(this.maskedTextBoxBirthDay);
             this.Controls.Add(this.label5);
@@ -251,6 +278,8 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.MaskedTextBox maskedTextBoxBirthDay;
         private System.Windows.Forms.ComboBox comboBoxAccountType;
+        private System.Windows.Forms.RadioButton rbTextFile;
+        private System.Windows.Forms.RadioButton rbMsSql;
     }
 }
 

@@ -81,6 +81,13 @@ namespace CoreFinance_Lab1_Account
                     logger.Log($"[УСПЕХ] Открыт ДЕБЕТОВЫЙ счёт. Клиент: {textBoxLastName.Text} {textBoxFirstName.Text}. Баланс: {acc.Balance} руб.");
                 }
 
+                IAccountRepository currentStorage = rbTextFile.Checked
+                    ? (IAccountRepository)new DatabaseManager()
+                    : new SqlServerRepository();
+
+                currentStorage.Initialize();
+                currentStorage.SaveAccount(comboBoxAccountType.Text, acc);
+
                 lastInterestDate = DateTime.Now;
                 textBoxAmount.Clear();
                 maskedTextBoxBirthDay.Clear();
@@ -103,7 +110,7 @@ namespace CoreFinance_Lab1_Account
             interestTimer.Start();
 
             DatabaseManager db = new DatabaseManager();
-            db.CreateTablesIfNotExist();
+            db.Initialize();
         }
 
         private void maskedTextBoxBirthDay_MouseClick(object sender, MouseEventArgs e)
