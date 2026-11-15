@@ -98,7 +98,6 @@ namespace CoreFinance_Lab1_Account
         [TestMethod]
         public void Test_MS_SQL_Server_SaveAndLoad()
         {
-            // 1. Arrange (Подготовка хранилища MS SQL Server и тестового клиента)
             IAccountRepository sqlRepo = new SqlServerRepository();
             sqlRepo.Initialize();
 
@@ -107,11 +106,9 @@ namespace CoreFinance_Lab1_Account
                 "DebitAccount", uniqueLastName, "Иван", "Иванович", new DateTime(1995, 5, 15), 25000
             );
 
-            // 2. Act (Сохраняем в базу MS SQL Server и выгружаем список обратно)
             sqlRepo.SaveAccount("DebitAccount", testAccount);
             List<BankAccount> loadedAccounts = sqlRepo.LoadAccounts();
 
-            // 3. Assert (Проверяем, что наш клиент с уникальной фамилией и балансом 25000 найден в БД)
             BankAccount found = loadedAccounts.Find(a => a.LastNameProperty == uniqueLastName);
 
             Assert.IsNotNull(found, "Счёт не был найден в базе данных MS SQL Server после сохранения!");
@@ -121,7 +118,6 @@ namespace CoreFinance_Lab1_Account
         [TestMethod]
         public void Test_OptimisticLock_RaceConditionBlocked()
         {
-            // 1. Arrange: Создаём счёт Ивана с балансом 100 000 руб. (начальная Version = 1)
             SqlServerRepository repo = new SqlServerRepository();
             repo.Initialize();
 
@@ -130,28 +126,58 @@ namespace CoreFinance_Lab1_Account
                 "DebitAccount", testName, "Иван", "Иванович", new DateTime(1990, 1, 1), 100000);
             repo.SaveAccount("DebitAccount", initialAcc);
 
-            // Имитируем ДВА устройства, которые одновременно открыли этот счёт (у обоих в памяти Version = 1)
             BankAccount device1_Phone = repo.LoadAccounts().Find(a => a.LastNameProperty == testName);
             BankAccount device2_Web = repo.LoadAccounts().Find(a => a.LastNameProperty == testName);
 
-            // 2. Act:
-            // Устройство 1 (телефон) снимает 100 000 руб. и успешно сохраняет (Version в базе становится 2)
             device1_Phone.Debit(100000);
             repo.UpdateAccountWithLock(device1_Phone);
 
-            // 3. Assert: Устройство 2 (браузер со старой Version = 1) пытается пополнить счёт поверх старого баланса
             try
             {
                 device2_Web.Credit(500);
                 repo.UpdateAccountWithLock(device2_Web);
 
-                // Если мы дошли до этой строки и ошибка не вылетела — значит защита не сработала!
                 Assert.Fail("Критическая ошибка: Система пропустила перезапись устаревшими данными без исключения!");
             }
             catch (InvalidOperationException)
             {
-                // Защита сработала идеально: база поймала конфликт версий и заблокировала операцию. Тест пройден!
+
             }
+        }
+
+        [TestMethod]
+        public void Test_BankServerSingleton_CacheAndDebit_Success()
+        {
+            // 1. Arrange: Очищаем кэш и создаём нового клиента в MS SQL Server
+            BankServerSingleton.Instance.ClearCache();
+            IAccountRepository repo = new SqlServerRepository();
+            repo.Initialize();
+
+            string uniqueName = "КэшТест_" + Guid.NewGuid().ToString().Substring(0, 4);
+            BankAccount newAcc = AccountFactory.Instance.CreateAccount(
+                "DebitAccount", uniqueName, "Анна", "Сергеевна", new DateTime(1992, 3, 10), 50000);
+            repo.SaveAccount("DebitAccount", newAcc);
+
+            // Получаем присвоенный базой ID этого счёта
+            BankAccount savedInDb = repo.LoadAccounts().Find(a => a.LastNameProperty == uniqueName);
+            int targetId = savedInDb.Id;
+
+            // 2. Act:
+            // Первый вызов GetAccount подтянет счёт из SQL в ОЗУ (ConcurrentDictionary)
+            BankAccount fromDbToCache = BankServerSingleton.Instance.GetAccount(targetId, repo);
+
+            // Списываем 15 000 руб. через наш сервер (обновится и кэш, и SQL-таблица)
+            bool result = BankServerSingleton.Instance.DebitMoney(targetId, 15000, repo);
+
+            // Второй вызов GetAccount возьмёт счёт уже мгновенно из кэша ОЗУ
+            BankAccount fromCacheFast = BankServerSingleton.Instance.GetAccount(targetId, repo);
+
+            // 3. Assert: Проверяем синхронизацию ОЗУ и базы данных
+            Assert.IsTrue(result);
+            Assert.AreEqual(35000, fromCacheFast.Balance, "Баланс в кэше ОЗУ должен стать 35 000 руб.!");
+
+            BankAccount verifyInDb = repo.LoadAccounts().Find(a => a.Id == targetId);
+            Assert.AreEqual(35000, verifyInDb.Balance, "Баланс в MS SQL Server должен синхронно стать 35 000 руб.!");
         }
     }
 

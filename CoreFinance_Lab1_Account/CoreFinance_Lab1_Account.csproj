@@ -120,6 +120,7 @@
     <Compile Include="AccountFactory.cs" />
     <Compile Include="AccountTests.cs" />
     <Compile Include="BankAccount.cs" />
+    <Compile Include="BankServerSingleton.cs" />
     <Compile Include="CreditAccount.cs" />
     <Compile Include="DatabaseManager.cs" />
     <Compile Include="DebitAccount.cs" />
