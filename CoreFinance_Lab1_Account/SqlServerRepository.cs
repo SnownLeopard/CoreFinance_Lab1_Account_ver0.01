@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Data.SqlTypes;
 
 namespace CoreFinance_Lab1_Account
 {
@@ -34,7 +35,8 @@ namespace CoreFinance_Lab1_Account
                             LastName NVARCHAR(100) NOT NULL,
                             FirstName NVARCHAR(100) NOT NULL,
                             BirthDate DATE NOT NULL,
-                            Balance FLOAT NOT NULL
+                            Balance FLOAT NOT NULL,
+                            [Version] INT NOT NULL DEFAULT 1
                         );";
                     using (SqlCommand cmd = new SqlCommand(createTable, conn))
                     {
@@ -51,8 +53,8 @@ namespace CoreFinance_Lab1_Account
         public void SaveAccount(string accountType, BankAccount account)
         {
             if (account == null) return;
-            string query = "INSERT INTO Accounts (AccountType, LastName, FirstName, BirthDate, Balance) VALUES (@Type, @Last, @First, @Birth, @Bal);";
-
+            string query = "INSERT INTO Accounts (AccountType, LastName, FirstName, BirthDate, Balance, [Version]) VALUES (@Type, @Last, @First, @Birth, @Bal, @Ver);";
+            
             using (SqlConnection conn = new SqlConnection(dbConnStr))
             {
                 conn.Open();
@@ -63,6 +65,7 @@ namespace CoreFinance_Lab1_Account
                     cmd.Parameters.AddWithValue("@First", account.FirstNameProperty);
                     cmd.Parameters.AddWithValue("@Birth", account.BirthDate);
                     cmd.Parameters.AddWithValue("@Bal", account.Balance);
+                    cmd.Parameters.AddWithValue("@Ver", account.Version);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -71,7 +74,7 @@ namespace CoreFinance_Lab1_Account
         public List<BankAccount> LoadAccounts()
         {
             List<BankAccount> list = new List<BankAccount>();
-            string query = "SELECT AccountType, LastName, FirstName, BirthDate, Balance FROM Accounts;";
+            string query = "SELECT Id, AccountType, LastName, FirstName, BirthDate, Balance, [Version] FROM Accounts;";
 
             using (SqlConnection conn = new SqlConnection(dbConnStr))
             {
@@ -89,11 +92,42 @@ namespace CoreFinance_Lab1_Account
                             Convert.ToDateTime(reader["BirthDate"]),
                             Convert.ToDouble(reader["Balance"])
                         );
+                        acc.Id = Convert.ToInt32(reader["Id"]);
+                        acc.Version = Convert.ToInt32(reader["Version"]);
                         list.Add(acc);
                     }
                 }
             }
             return list;
+        }
+
+        public void UpdateAccountWithLock(BankAccount account)
+        {
+            string query = @"
+        UPDATE Accounts 
+        SET Balance = @NewBalance, [Version] = [Version] + 1 
+        WHERE Id = @Id AND [Version] = @ExpectedVersion;";
+
+            using (SqlConnection conn = new SqlConnection(dbConnStr))
+            {
+                conn.Open();
+                using (SqlCommand cmd = new SqlCommand(query, conn))
+                {
+                    cmd.Parameters.AddWithValue("@NewBalance", account.Balance);
+                    cmd.Parameters.AddWithValue("@Id", account.Id);
+                    cmd.Parameters.AddWithValue("@ExpectedVersion", account.Version);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    if (rowsAffected == 0)
+                    {
+                        throw new InvalidOperationException(
+                            "КОНФЛИКТ ВЕРСИЙ (Optimistic Lock)! Данные счёта были изменены с другого устройства. Операция заблокирована.");
+                    }
+
+                    account.Version++;
+                }
+            }
         }
     }
 }

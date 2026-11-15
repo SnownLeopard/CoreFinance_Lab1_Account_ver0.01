@@ -7,5 +7,7 @@ namespace CoreFinance_Lab1_Account
         void Initialize();
         void SaveAccount(string accountType, BankAccount account);
         List<BankAccount> LoadAccounts();
+        void UpdateAccountWithLock(BankAccount account);
+        
     }
 }

@@ -118,6 +118,41 @@ namespace CoreFinance_Lab1_Account
             Assert.AreEqual(25000, found.Balance, "Баланс счёта в базе данных не совпадает с исходным!");
         }
 
+        [TestMethod]
+        public void Test_OptimisticLock_RaceConditionBlocked()
+        {
+            // 1. Arrange: Создаём счёт Ивана с балансом 100 000 руб. (начальная Version = 1)
+            SqlServerRepository repo = new SqlServerRepository();
+            repo.Initialize();
+
+            string testName = "Иван_Race_" + Guid.NewGuid().ToString().Substring(0, 4);
+            BankAccount initialAcc = AccountFactory.Instance.CreateAccount(
+                "DebitAccount", testName, "Иван", "Иванович", new DateTime(1990, 1, 1), 100000);
+            repo.SaveAccount("DebitAccount", initialAcc);
+
+            // Имитируем ДВА устройства, которые одновременно открыли этот счёт (у обоих в памяти Version = 1)
+            BankAccount device1_Phone = repo.LoadAccounts().Find(a => a.LastNameProperty == testName);
+            BankAccount device2_Web = repo.LoadAccounts().Find(a => a.LastNameProperty == testName);
+
+            // 2. Act:
+            // Устройство 1 (телефон) снимает 100 000 руб. и успешно сохраняет (Version в базе становится 2)
+            device1_Phone.Debit(100000);
+            repo.UpdateAccountWithLock(device1_Phone);
+
+            // 3. Assert: Устройство 2 (браузер со старой Version = 1) пытается пополнить счёт поверх старого баланса
+            try
+            {
+                device2_Web.Credit(500);
+                repo.UpdateAccountWithLock(device2_Web);
+
+                // Если мы дошли до этой строки и ошибка не вылетела — значит защита не сработала!
+                Assert.Fail("Критическая ошибка: Система пропустила перезапись устаревшими данными без исключения!");
+            }
+            catch (InvalidOperationException)
+            {
+                // Защита сработала идеально: база поймала конфликт версий и заблокировала операцию. Тест пройден!
+            }
+        }
     }
 
     public class FakeLogger : ILogger

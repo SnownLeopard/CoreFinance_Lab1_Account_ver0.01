@@ -18,6 +18,9 @@ namespace CoreFinance_Lab1_Account
         public string LastNameProperty => lastName;
         public string FirstNameProperty => firstName;
 
+        public int Id { get; set; }
+        public int Version { get; set; } = 1;
+
         public double Balance
         {
             get { return balance; }
